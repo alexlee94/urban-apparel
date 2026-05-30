@@ -73,7 +73,7 @@ public class CartService {
         cartItem.setQuantity(newQuantity);
         cartItemRepository.save(cartItem);
 
-        return toResponse(cart);
+        return toResponse(cartRepository.findByUser(user).orElseThrow());
     }
 
     // ── Update Cart Item ──────────────────────────────────────────────────────

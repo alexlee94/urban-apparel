@@ -48,8 +48,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
+        ex.printStackTrace();
         return ResponseEntity.status(500)
-                .body(new ErrorResponse(500, "An unexpected error occurred"));
+                .body(new ErrorResponse(500, ex.getMessage()));
     }
 
     public record ErrorResponse(int status, String message, Instant timestamp) {

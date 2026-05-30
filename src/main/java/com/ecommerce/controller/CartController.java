@@ -6,8 +6,7 @@ import com.ecommerce.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,30 +17,29 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping
-    public ResponseEntity<CartResponse> getCart(
-            @AuthenticationPrincipal UserDetails user) {
-        return ResponseEntity.ok(cartService.getCart(user.getUsername()));
+    public ResponseEntity<CartResponse> getCart(Authentication authentication) {
+        return ResponseEntity.ok(cartService.getCart(authentication.getName()));
     }
 
     @PostMapping
     public ResponseEntity<CartResponse> addToCart(
-            @AuthenticationPrincipal UserDetails user,
+            Authentication authentication,
             @Valid @RequestBody CartRequest req) {
-        return ResponseEntity.ok(cartService.addToCart(user.getUsername(), req));
+        return ResponseEntity.ok(cartService.addToCart(authentication.getName(), req));
     }
 
     @PutMapping("/{cartItemId}")
     public ResponseEntity<CartResponse> updateCartItem(
-            @AuthenticationPrincipal UserDetails user,
+            Authentication authentication,
             @PathVariable Long cartItemId,
             @Valid @RequestBody CartRequest req) {
-        return ResponseEntity.ok(cartService.updateCartItem(user.getUsername(), cartItemId, req));
+        return ResponseEntity.ok(cartService.updateCartItem(authentication.getName(), cartItemId, req));
     }
 
     @DeleteMapping("/{cartItemId}")
     public ResponseEntity<CartResponse> removeFromCart(
-            @AuthenticationPrincipal UserDetails user,
+            Authentication authentication,
             @PathVariable Long cartItemId) {
-        return ResponseEntity.ok(cartService.removeFromCart(user.getUsername(), cartItemId));
+        return ResponseEntity.ok(cartService.removeFromCart(authentication.getName(), cartItemId));
     }
 }
