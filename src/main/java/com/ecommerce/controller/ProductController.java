@@ -2,6 +2,7 @@ package com.ecommerce.controller;
 
 import com.ecommerce.dto.request.ProductRequest;
 import com.ecommerce.dto.response.ProductResponse;
+import com.ecommerce.service.CloudinaryService;
 import com.ecommerce.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/products")
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService productService;
+    private final CloudinaryService cloudinaryService;
 
     // ── Public endpoints ──────────────────────────────────────────────────────
 
@@ -61,5 +64,14 @@ public class ProductController {
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/image")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProductResponse> uploadImage(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        String imageUrl = cloudinaryService.uploadImage(file);
+        return ResponseEntity.ok(productService.updateImageUrl(id, imageUrl));
     }
 }

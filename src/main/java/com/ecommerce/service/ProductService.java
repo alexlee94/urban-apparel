@@ -93,6 +93,14 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    @Transactional
+    public ProductResponse updateImageUrl(Long id, String imageUrl) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+        product.setImageUrl(imageUrl);
+        return toResponse(productRepository.save(product));
+    }
+
     // ── Mapper ────────────────────────────────────────────────────────────────
 
     private ProductResponse toResponse(Product product) {
