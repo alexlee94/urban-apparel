@@ -37,6 +37,7 @@ public class Product {
     private Category category;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean active = true;
 
     @CreationTimestamp
