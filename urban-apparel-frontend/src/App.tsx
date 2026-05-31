@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage';
 import CartPage from './pages/CartPage';
 import OrdersPage from './pages/OrdersPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import AdminPage from './pages/AdminPage';
 
 const PrivateRoute = ({ children }: { children: React.ReactElement }) => {
     const { isAuthenticated } = useAuth();
@@ -31,6 +32,11 @@ const AppRoutes = () => {
                 <Route path="/orders" element={
                     <PrivateRoute>
                         <OrdersPage />
+                    </PrivateRoute>
+                } />
+                <Route path="/admin" element={
+                    <PrivateRoute>
+                        <AdminPage />
                     </PrivateRoute>
                 } />
             </Routes>
