@@ -51,4 +51,11 @@ public class OrderController {
             @RequestParam Order.OrderStatus status) {
         return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
     }
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<OrderResponse>> getAllOrders(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(orderService.getAllOrders(pageable));
+    }
 }

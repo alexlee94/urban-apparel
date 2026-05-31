@@ -112,6 +112,11 @@ public class OrderService {
         return toResponse(orderRepository.save(order));
     }
 
+    @Transactional(readOnly = true)
+    public Page<OrderResponse> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable).map(this::toResponse);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private User getUser(String email) {
