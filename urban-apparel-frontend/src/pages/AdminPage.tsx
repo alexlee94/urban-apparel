@@ -1,18 +1,20 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import {
     Container, Typography, Box, Button, TextField,
-    Card, CardContent, Alert, CircularProgress,
+    Card, CardContent, CardMedia, Alert, CircularProgress,
     Divider, Select, MenuItem, FormControl, InputLabel, Tab, Tabs
 } from '@mui/material';
-import { createProduct, uploadProductImage } from '../api/products';
+import { createProduct, uploadProductImage, getAllProductsAdmin } from '../api/products';
 import { getMyOrders } from '../api/orders';
 import api from '../api/axios';
-import { Order } from '../types';
+import { Order, Product } from '../types';
 
 const AdminPage = () => {
     const [tab, setTab] = useState(0);
     const [orders, setOrders] = useState<Order[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [ordersLoading, setOrdersLoading] = useState(true);
+    const [productsLoading, setProductsLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [newProduct, setNewProduct] = useState({
@@ -22,11 +24,12 @@ const AdminPage = () => {
         stock: '',
     });
     const [imageFile, setImageFile] = useState<File | null>(null);
-    const [createdProductId, setCreatedProductId] = useState<number | null>(null);
     const [productLoading, setProductLoading] = useState(false);
+    const [updateImageFiles, setUpdateImageFiles] = useState<{ [key: number]: File }>({});
 
     useEffect(() => {
         fetchAllOrders();
+        fetchAllProducts();
     }, []);
 
     const fetchAllOrders = async () => {
@@ -35,10 +38,21 @@ const AdminPage = () => {
             const data = await api.get('/api/orders/all');
             setOrders(data.data.content);
         } catch {
-            // fallback to user orders for now
             setOrdersLoading(false);
         } finally {
             setOrdersLoading(false);
+        }
+    };
+
+    const fetchAllProducts = async () => {
+        setProductsLoading(true);
+        try {
+            const data = await getAllProductsAdmin();
+            setProducts(data.content);
+        } catch {
+            setError('Failed to load products');
+        } finally {
+            setProductsLoading(false);
         }
     };
 
@@ -65,7 +79,6 @@ const AdminPage = () => {
                 price: parseFloat(newProduct.price),
                 stock: parseInt(newProduct.stock),
             });
-            setCreatedProductId(product.id);
 
             if (imageFile) {
                 await uploadProductImage(product.id, imageFile);
@@ -74,11 +87,31 @@ const AdminPage = () => {
             setSuccess('Product created successfully!');
             setNewProduct({ name: '', description: '', price: '', stock: '' });
             setImageFile(null);
+            fetchAllProducts();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to create product');
         } finally {
             setProductLoading(false);
+        }
+    };
+
+    const handleUpdateImage = async (productId: number) => {
+        const file = updateImageFiles[productId];
+        if (!file) {
+            setError('Please select an image first');
+            setTimeout(() => setError(''), 2000);
+            return;
+        }
+        try {
+            await uploadProductImage(productId, file);
+            setSuccess('Image updated successfully!');
+            setTimeout(() => setSuccess(''), 2000);
+            fetchAllProducts();
+            setUpdateImageFiles({ ...updateImageFiles, [productId]: undefined as any });
+        } catch (err) {
+            setError('Failed to update image');
+            setTimeout(() => setError(''), 2000);
         }
     };
 
@@ -93,6 +126,7 @@ const AdminPage = () => {
 
             <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
                 <Tab label="Add Product" />
+                <Tab label="Manage Products" />
                 <Tab label="Manage Orders" />
             </Tabs>
 
@@ -165,8 +199,62 @@ const AdminPage = () => {
                 </Card>
             )}
 
-            {/* Manage Orders Tab */}
+            {/* Manage Products Tab */}
             {tab === 1 && (
+                <Box>
+                    {productsLoading ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                            <CircularProgress />
+                        </Box>
+                    ) : (
+                        products.map((product) => (
+                            <Card key={product.id} sx={{ mb: 2 }}>
+                                <CardContent>
+                                    <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+                                        <img
+                                            src={product.imageUrl || 'https://via.placeholder.com/80x80?text=No+Image'}
+                                            alt={product.name}
+                                            style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4 }}
+                                        />
+                                        <Box sx={{ flexGrow: 1 }}>
+                                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                                {product.name}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                ${product.price.toFixed(2)} · {product.stock} in stock
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                                    if (e.target.files) {
+                                                        setUpdateImageFiles({
+                                                            ...updateImageFiles,
+                                                            [product.id]: e.target.files[0]
+                                                        });
+                                                    }
+                                                }}
+                                            />
+                                            <Button
+                                                variant="outlined"
+                                                size="small"
+                                                onClick={() => handleUpdateImage(product.id)}
+                                            >
+                                                Update Image
+                                            </Button>
+                                        </Box>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        ))
+                    )}
+                </Box>
+            )}
+
+            {/* Manage Orders Tab */}
+            {tab === 2 && (
                 <Box>
                     {ordersLoading ? (
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>

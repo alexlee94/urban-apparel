@@ -42,3 +42,8 @@ export const uploadProductImage = async (
     });
     return response.data;
 };
+
+export const getAllProductsAdmin = async (page = 0, size = 20): Promise<Page<Product>> => {
+    const response = await api.get(`/api/products?page=${page}&size=${size}`);
+    return response.data;
+};
