@@ -1,11 +1,10 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import {
     Container, Typography, Box, Button, TextField,
-    Card, CardContent, CardMedia, Alert, CircularProgress,
+    Card, CardContent, Alert, CircularProgress,
     Divider, Select, MenuItem, FormControl, InputLabel, Tab, Tabs
 } from '@mui/material';
 import { createProduct, uploadProductImage, getAllProductsAdmin } from '../api/products';
-import { getMyOrders } from '../api/orders';
 import api from '../api/axios';
 import { Order, Product } from '../types';
 
