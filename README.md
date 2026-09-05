@@ -1,10 +1,10 @@
-# Urban Apparel 🛍️
+# Urban Apparel
 
-A full-stack e-commerce platform for clothing, built with Java Spring Boot and React TypeScript.
+A full-stack e-commerce platform for clothing, built with Java, Spring Boot, and React TypeScript.
 
 ## Tech Stack
 
-**Backend:** Java, Spring Boot, Spring Security, JWT  
+**Backend:** Java, Spring Boot, Spring Security, JWT, Spring Data JPA  
 **Frontend:** React, TypeScript, Material UI  
 **Database:** MySQL  
 **Cloud:** Cloudinary (image storage)  
@@ -12,17 +12,31 @@ A full-stack e-commerce platform for clothing, built with Java Spring Boot and R
 
 ## Features
 
-- **JWT Authentication** — Secure login and registration with role-based access control (USER/ADMIN). Access control enforced at the API layer, not the frontend, so admin endpoints cannot be reached regardless of how the request is made.
-- **Product Catalog** — Browse products with images, filter by category, and view product details.
-- **Shopping Cart** — Add, update, and remove items from cart.
-- **Pessimistic Locking** — Concurrent cart and inventory updates are wrapped in a single transaction with pessimistic locking, preventing inventory from being decremented below zero.
-- **Checkout & Orders** — Full checkout flow with order history and status tracking.
-- **Admin Panel** — Admins can create products, upload images, and manage order statuses.
-- **Cloudinary Integration** — Product images uploaded and served via Cloudinary.
+- **JWT Authentication** — login and registration with role-based access control (USER/ADMIN). Access control is enforced at the API layer, not the frontend, so admin endpoints cannot be reached regardless of how the request is made.
+- **Product Catalog** — browse products with images, filter by category, and view product details.
+- **Shopping Cart** — add, update, and remove items from cart.
+- **Pessimistic Locking** — concurrent cart and inventory updates are wrapped in a single transaction with pessimistic locking, preventing inventory from being decremented below zero.
+- **Checkout & Orders** — full checkout flow with order history and status tracking.
+- **Admin Panel** — admins can create products, upload images, and manage order statuses.
+- **Cloudinary Integration** — product images uploaded and served via Cloudinary.
 
-## Screenshots
+## How It Works
 
-> Add screenshots here after deployment
+```
+User adds item to cart
+        ↓
+Product row locked with pessimistic locking
+        ↓
+Stock validated and decremented inside a single transaction
+        ↓
+User checks out
+        ↓
+Every product in the cart gets locked, validated, and decremented
+        ↓
+Order created, cart cleared
+        ↓
+If any product runs out of stock mid-checkout → entire transaction rolls back
+```
 
 ## Running Locally
 
